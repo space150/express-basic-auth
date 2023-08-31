@@ -85,7 +85,10 @@ declare namespace expressBasicAuth {
          * @default ''
          */
         unauthorizedResponse?: ValueOrFunction<any>
-
+        
+        /**
+         * You can pass a function to skip the middleware under certain conditions.
+         */
         ignore?: (request:Request) => boolean
     }
 
