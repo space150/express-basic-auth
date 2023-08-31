@@ -85,6 +85,8 @@ declare namespace expressBasicAuth {
          * @default ''
          */
         unauthorizedResponse?: ValueOrFunction<any>
+
+        ignore?: (request:Request) => boolean
     }
 
     interface IUsersOptions extends IBaseOptions {

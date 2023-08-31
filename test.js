@@ -66,6 +66,11 @@ var realmFunctionAuth = basicAuth({
     }
 })
 
+var ignoreAuth = basicAuth({
+  ignore: (req) => { return req.path === '/ignored' },
+  users: { 'Foo': 'bar' }
+})
+
 app.get('/static', staticUserAuth, function(req, res) {
     res.status(200).send('You passed')
 })
@@ -104,6 +109,14 @@ app.get('/realm', realmAuth, function(req, res) {
 
 app.get('/realmfunction', realmFunctionAuth, function(req, res) {
     res.status(200).send('You passed')
+})
+
+app.get('/not-ignored', ignoreAuth, function(req, res) {
+  res.status(200).send('You passed')
+})
+
+app.get('/ignored', ignoreAuth, function(req, res) {
+  res.status(200).send('You passed')
 })
 
 //Custom authorizer checking if the username starts with 'A' and the password with 'secret'
@@ -314,5 +327,33 @@ describe('express-basic-auth', function() {
                 .expect('WWW-Authenticate', 'Basic realm="bla"')
                 .expect(401, done)
         })
+    })
+
+    describe('ignorePaths', function() {
+      it('should pass when a route is ignored', function(done) {
+        supertest(app)
+          .get('/ignored')
+          .expect(200, done)
+      })
+
+      it('should reject when a route is not ignored with no credentials', function(done) {
+        supertest(app)
+          .get('/not-ignored')
+          .expect(401, done)
+      })
+
+      it('should reject when a route is not ignored with bad credentials', function(done) {
+        supertest(app)
+        .get('/not-ignored')
+        .auth('Bad', 'credentials')
+        .expect(401, done)
+      })
+
+      it('should accept when a route is not ignored with good credentials', function(done) {
+        supertest(app)
+        .get('/not-ignored')
+        .auth('Foo', 'Bar')
+        .expect(401, done)
+      })
     })
 })
